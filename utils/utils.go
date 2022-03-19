@@ -14,7 +14,9 @@ var (
 )
 
 type OptsType struct {
-	ServerPort int
+	ServerPort     int
+	SendGridApiKey string
+	EmailFrom      string
 }
 
 func NewOpts() {
@@ -25,6 +27,8 @@ func NewOpts() {
 
 	o := &OptsType{}
 	flag.IntVar(&o.ServerPort, "SERVER_PORT", lookupEnvInt("SERVER_PORT", 8001), "Server PORT")
+	flag.StringVar(&o.SendGridApiKey, "SENDGRID_API_KEY", lookupEnv("SENDGRID_API_KEY"), "SendGrid API Key")
+	flag.StringVar(&o.EmailFrom, "EMAIL_FROM", lookupEnv("EMAIL_FROM"), "Email From")
 
 	Opts = o
 }
