@@ -106,48 +106,63 @@ components:
     WebHook:
       title: WebHook
       type: object
+      required:
+        - url
+        - signature
+        - data
       properties:
         url:
           type: string
-        content:
-          $ref: '#/components/schemas/WebHookContent'
-    WebHookContent:
-      title: WebHookContent
+        body:
+          $ref: '#/components/schemas/WebHookBody'
+    WebHookBody:
+      title: WebHook Body
+      type: object
+      required:
+        - data
+        - signature
+      properties:
+        data:
+          $ref: '#/components/schemas/WebHookData'
+        signature:
+          type: string
+    WebHookData:
+      title: WebHook Data
       type: object
       properties:
         payment_id:
           type: integer
         pay_address:
-         type: string
+          type: string
         price_amount:
-         type: number
+          type: number
         price_currency:
-         type: string
-         enum:
-           - usd
-           - chf
+          type: string
+          enum:
+            - usd
+            - chf
         pay_amount:
-         type: number
+          type: number
         pay_currency:
-         type: string
-         enum:
-           - eth
-           - btc
+          type: string
+          enum:
+            - eth
+            - btc
         actually_paid:
           type: number
         payment_status:
-         type: string
-         enum:
-           - waiting
-           - partially_paid 
-           - paid
-           - sending
-           - finished
-           - expired
-           - failed
+          type: string
+          enum:
+            - waiting
+            - partially_paid
+            - paid
+            - sending
+            - finished
+            - expired
+            - failed
         created_at:
-         type: string
-         format: date-time
+          type: string
+          format: date-time
         updated_at:
-         type: string
-         format: date-time
+          type: string
+          format: date-time

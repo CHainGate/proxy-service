@@ -10,8 +10,10 @@
 package services
 
 import (
+	"bytes"
 	"chaingate/proxy-service/proxyApi"
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 )
@@ -28,15 +30,16 @@ func NewWebhookApiService() proxyApi.WebhookApiServicer {
 }
 
 // SendWebhook - send webhook
-func (s *WebhookApiService) SendWebhook(ctx context.Context, webHook proxyApi.WebHook) (proxyApi.ImplResponse, error) {
-	// TODO - update SendWebhook with the required logic for this service method.
-	// Add api_webhook_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+func (s *WebhookApiService) SendWebhook(_ context.Context, webHook proxyApi.WebHook) (proxyApi.ImplResponse, error) {
+	jsonData, err := json.Marshal(webHook.Body)
+	if err != nil {
+		return proxyApi.Response(http.StatusInternalServerError, nil), errors.New("Cannot convert body to json ")
+	}
 
-	//TODO: Uncomment the next line to return response Response(200, {}) or use other options such as http.Ok ...
-	//return Response(200, nil),nil
+	resp, err := http.Post(webHook.Url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return proxyApi.Response(http.StatusInternalServerError, nil), err
+	}
 
-	//TODO: Uncomment the next line to return response Response(400, {}) or use other options such as http.Ok ...
-	//return Response(400, nil),nil
-
-	return proxyApi.Response(http.StatusNotImplemented, nil), errors.New("SendWebhook method not implemented")
+	return proxyApi.Response(resp.StatusCode, nil), nil
 }
