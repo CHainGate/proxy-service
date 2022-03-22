@@ -108,8 +108,7 @@ components:
       type: object
       required:
         - url
-        - signature
-        - data
+        - body
       properties:
         url:
           type: string
@@ -129,9 +128,21 @@ components:
     WebHookData:
       title: WebHook Data
       type: object
+      required:
+        - payment_id
+        - pay_address
+        - price_amount
+        - price_currency
+        - pay_amount
+        - pay_currency
+        - actually_paid
+        - payment_status
+        - created_at
+        - updated_at
       properties:
         payment_id:
-          type: integer
+          type: string
+          format: uuid
         pay_address:
           type: string
         price_amount:
@@ -150,6 +161,7 @@ components:
             - btc
         actually_paid:
           type: number
+          nullable: true
         payment_status:
           type: string
           enum:
