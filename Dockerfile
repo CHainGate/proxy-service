@@ -14,13 +14,12 @@ COPY services/ ./services/
 COPY swaggerui/ ./swaggerui/
 COPY utils/*.go ./utils/
 COPY .openapi-generator-ignore ./
-COPY openapi-proxy-service.yaml ./
 
 # maybe there is a better way to use openapi-generator-cli
 RUN apk add --update nodejs npm
 RUN apk add openjdk11
 RUN npm install @openapitools/openapi-generator-cli -g
-RUN npx @openapitools/openapi-generator-cli generate -i ./openapi-proxy-service.yaml -g go-server -o ./ --additional-properties=sourceFolder=proxyApi,packageName=proxyApi
+RUN npx @openapitools/openapi-generator-cli generate -i ./swaggerui/openapi.yaml -g go-server -o ./ --additional-properties=sourceFolder=proxyApi,packageName=proxyApi
 RUN go install golang.org/x/tools/cmd/goimports@latest
 RUN goimports -w .
 

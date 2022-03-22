@@ -85,12 +85,15 @@ components:
       type: object
       required:
         - name
-        - content
         - email_to
+        - subject
+        - content
       properties:
         name:
           type: string
         email_to:
+          type: string
+        subject:
           type: string
         content:
           type: string

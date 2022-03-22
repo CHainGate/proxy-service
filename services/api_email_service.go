@@ -11,9 +11,13 @@ package services
 
 import (
 	"chaingate/proxy-service/proxyApi"
+	"chaingate/proxy-service/utils"
 	"context"
 	"errors"
 	"net/http"
+
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 // EmailApiService is a service that implements the logic for the EmailApiServicer
@@ -29,14 +33,18 @@ func NewEmailApiService() proxyApi.EmailApiServicer {
 
 // SendEmail - send email
 func (s *EmailApiService) SendEmail(ctx context.Context, email proxyApi.Email) (proxyApi.ImplResponse, error) {
-	// TODO - update SendEmail with the required logic for this service method.
-	// Add api_email_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	from := mail.NewEmail("CHainGate", utils.Opts.EmailFrom)
+	subject := email.Subject
+	to := mail.NewEmail(email.Name, email.EmailTo)
+	plainTextContent := email.Content
+	htmlContent := email.Content
+	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+	client := sendgrid.NewSendClient(utils.Opts.SendGridApiKey)
 
-	//TODO: Uncomment the next line to return response Response(200, {}) or use other options such as http.Ok ...
-	//return Response(200, nil),nil
+	_, err := client.Send(message)
+	if err != nil {
+		return proxyApi.Response(http.StatusInternalServerError, nil), errors.New("E-Mail could not be sent")
+	}
 
-	//TODO: Uncomment the next line to return response Response(400, {}) or use other options such as http.Ok ...
-	//return Response(400, nil),nil
-
-	return proxyApi.Response(http.StatusNotImplemented, nil), errors.New("SendEmail method not implemented")
+	return proxyApi.Response(http.StatusNoContent, nil), nil
 }
