@@ -103,6 +103,7 @@ components:
       properties:
         exchange_rate:
           type: number
+          format: double
     WebHookRequestDto:
       title: WebHook Request Dto
       type: object
@@ -147,6 +148,7 @@ components:
           type: string
         price_amount:
           type: number
+          format: double
         price_currency:
           type: string
           enum:
@@ -154,6 +156,7 @@ components:
             - chf
         pay_amount:
           type: number
+          format: double
         pay_currency:
           type: string
           enum:
@@ -161,6 +164,7 @@ components:
             - btc
         actually_paid:
           type: number
+          format: double
           nullable: true
         payment_status:
           type: string
