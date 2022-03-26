@@ -30,7 +30,7 @@ func NewWebhookApiService() proxyApi.WebhookApiServicer {
 }
 
 // SendWebhook - send webhook
-func (s *WebhookApiService) SendWebhook(_ context.Context, webHook proxyApi.WebHook) (proxyApi.ImplResponse, error) {
+func (s *WebhookApiService) SendWebhook(_ context.Context, webHook proxyApi.WebHookRequestDto) (proxyApi.ImplResponse, error) {
 	jsonData, err := json.Marshal(webHook.Body)
 	if err != nil {
 		return proxyApi.Response(http.StatusInternalServerError, nil), errors.New("Cannot convert body to json ")

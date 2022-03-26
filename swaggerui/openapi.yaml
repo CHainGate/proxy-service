@@ -9,7 +9,7 @@ info:
 tags:
   - name: email
   - name: webhook
-  - name: exchange rate
+  - name: conversion
 paths:
   /email:
     post:
@@ -25,21 +25,25 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/EmailRequestDto'
         
-  /exchangeRate:
+  /price-conversion:
     get:
       tags: 
-        - exchange rate
-      summary: get exchange rate
-      operationId: getExchangeRate
+        - conversion
+      summary: get price conversion
+      operationId: getPriceConversion
       parameters:
         - in: query
-          name: fiat
+          name: amount
           required: true
           schema:
             type: string
-        
         - in: query
-          name: crypto
+          name: src_currency
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: dst_currency
           schema:
             type: string
           required: true
@@ -49,7 +53,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExchangeRateResponseDto'
+                $ref: '#/components/schemas/PriceConversionResponseDto'
         '400':
           description: bad request
         
@@ -97,11 +101,15 @@ components:
           type: string
         content:
           type: string
-    ExchangeRateResponseDto:
-      title: Exchange Rate Response DTO
+    PriceConversionResponseDto:
+      title: Price Conversion Response DTO
       type: object
       properties:
-        exchange_rate:
+        src_currency:
+          type: string
+        dst_currency:
+          type: string
+        price:
           type: number
           format: double
     WebHookRequestDto:

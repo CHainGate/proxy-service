@@ -15,8 +15,8 @@ func main() {
 	EmailApiService := services.NewEmailApiService()
 	EmailApiController := proxyApi.NewEmailApiController(EmailApiService)
 
-	ExchangeRateApiService := services.NewExchangeRateApiService()
-	ExchangeRateApiController := proxyApi.NewExchangeRateApiController(ExchangeRateApiService)
+	ExchangeRateApiService := services.NewConversionApiService()
+	ExchangeRateApiController := proxyApi.NewConversionApiController(ExchangeRateApiService)
 
 	WebhookApiService := services.NewWebhookApiService()
 	WebhookApiController := proxyApi.NewWebhookApiController(WebhookApiService)

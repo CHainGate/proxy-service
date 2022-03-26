@@ -11,32 +11,103 @@ package services
 
 import (
 	"chaingate/proxy-service/proxyApi"
+	"chaingate/proxy-service/utils"
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
+	"strings"
+	"time"
 )
 
-// ExchangeRateApiService is a service that implements the logic for the ExchangeRateApiServicer
-// This service should implement the business logic for every endpoint for the ExchangeRateApi API.
+// ConversionApiService is a service that implements the logic for the ConversionApiService
+// This service should implement the business logic for every endpoint for the ConversionApiService API.
 // Include any external packages or services that will be required by this service.
-type ExchangeRateApiService struct {
+type ConversionApiService struct {
 }
 
-// NewExchangeRateApiService creates a default api service
-func NewExchangeRateApiService() proxyApi.ExchangeRateApiServicer {
-	return &ExchangeRateApiService{}
+// NewConversionApiService creates a default api service
+func NewConversionApiService() proxyApi.ConversionApiServicer {
+	return &ConversionApiService{}
 }
 
-// GetExchangeRate - get exchange rate
-func (s *ExchangeRateApiService) GetExchangeRate(ctx context.Context, fiat string, crypto string) (proxyApi.ImplResponse, error) {
-	// TODO - update GetExchangeRate with the required logic for this service method.
-	// Add api_exchange_rate_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+type CoinMarketCapConversion struct {
+	Status struct {
+		Timestamp    time.Time   `json:"timestamp"`
+		ErrorCode    int         `json:"error_code"`
+		ErrorMessage interface{} `json:"error_message"`
+		Elapsed      int         `json:"elapsed"`
+		CreditCount  int         `json:"credit_count"`
+		Notice       interface{} `json:"notice"`
+	} `json:"status"`
+	Data []struct {
+		Id          int                               `json:"id"`
+		Symbol      string                            `json:"symbol"`
+		Name        string                            `json:"name"`
+		Amount      int                               `json:"amount"`
+		LastUpdated time.Time                         `json:"last_updated"`
+		Quote       map[string]map[string]interface{} `json:"quote"`
+	} `json:"data"`
+}
 
-	//TODO: Uncomment the next line to return response Response(200, ExchangeRate{}) or use other options such as http.Ok ...
-	//return Response(200, ExchangeRate{}), nil
+// GetPriceConversion - get price conversion
+func (s *ConversionApiService) GetPriceConversion(_ context.Context, amount string, srcCurrency string, dstCurrency string) (proxyApi.ImplResponse, error) {
+	conversion, err := getPriceConversion(amount, srcCurrency, dstCurrency)
+	if err != nil {
+		return proxyApi.Response(http.StatusInternalServerError, nil), err
+	}
 
-	//TODO: Uncomment the next line to return response Response(400, {}) or use other options such as http.Ok ...
-	//return Response(400, nil),nil
+	price, err := getFloat(conversion.Data[0].Quote[strings.ToUpper(dstCurrency)]["price"])
+	if err != nil {
+		return proxyApi.Response(http.StatusInternalServerError, nil), err
+	}
 
-	return proxyApi.Response(http.StatusNotImplemented, nil), errors.New("GetExchangeRate method not implemented")
+	priceConversionResponseDto := proxyApi.PriceConversionResponseDto{
+		SrcCurrency: srcCurrency,
+		DstCurrency: dstCurrency,
+		Price:       price,
+	}
+
+	return proxyApi.Response(http.StatusOK, priceConversionResponseDto), nil
+}
+
+func getFloat(unknown interface{}) (float64, error) {
+	switch t := unknown.(type) {
+	case float64:
+		return t, nil
+	default:
+		return 0, errors.New("Could not parse to float ")
+	}
+}
+
+func getPriceConversion(amount string, srcCurrency string, dstCurrency string) (*CoinMarketCapConversion, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", utils.Opts.CoinMarketCapBaseUrl+"v2/tools/price-conversion", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	q := url.Values{}
+	q.Add("amount", amount)
+	q.Add("symbol", srcCurrency)
+	q.Add("convert", dstCurrency)
+
+	req.Header.Set("Accepts", "application/json")
+	req.Header.Add("X-CMC_PRO_API_KEY", utils.Opts.CoinMarketCapApiKey)
+	req.URL.RawQuery = q.Encode()
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var target CoinMarketCapConversion
+
+	err = json.NewDecoder(resp.Body).Decode(&target)
+	if err != nil {
+		return nil, err
+	}
+
+	return &target, nil
 }

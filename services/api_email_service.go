@@ -32,7 +32,7 @@ func NewEmailApiService() proxyApi.EmailApiServicer {
 }
 
 // SendEmail - send email
-func (s *EmailApiService) SendEmail(ctx context.Context, email proxyApi.Email) (proxyApi.ImplResponse, error) {
+func (s *EmailApiService) SendEmail(_ context.Context, email proxyApi.EmailRequestDto) (proxyApi.ImplResponse, error) {
 	from := mail.NewEmail("CHainGate", utils.Opts.EmailFrom)
 	subject := email.Subject
 	to := mail.NewEmail(email.Name, email.EmailTo)
