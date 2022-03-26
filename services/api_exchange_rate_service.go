@@ -51,16 +51,52 @@ type CoinMarketCapConversion struct {
 	} `json:"data"`
 }
 
+type CoinMarketCapConversionSandbox struct {
+	Status struct {
+		Timestamp    time.Time   `json:"timestamp"`
+		ErrorCode    int         `json:"error_code"`
+		ErrorMessage interface{} `json:"error_message"`
+		Elapsed      int         `json:"elapsed"`
+		CreditCount  int         `json:"credit_count"`
+		Notice       interface{} `json:"notice"`
+	} `json:"status"`
+	Data map[string]DataSandbox `json:"data"`
+}
+
+type DataSandbox struct {
+	Symbol      string                            `json:"symbol"`
+	Id          string                            `json:"id"`
+	Name        string                            `json:"name"`
+	Amount      int                               `json:"amount"`
+	LastUpdated time.Time                         `json:"last_updated"`
+	Quote       map[string]map[string]interface{} `json:"quote"`
+}
+
 // GetPriceConversion - get price conversion
-func (s *ConversionApiService) GetPriceConversion(_ context.Context, amount string, srcCurrency string, dstCurrency string) (proxyApi.ImplResponse, error) {
-	conversion, err := getPriceConversion(amount, srcCurrency, dstCurrency)
-	if err != nil {
-		return proxyApi.Response(http.StatusInternalServerError, nil), err
+func (s *ConversionApiService) GetPriceConversion(_ context.Context, amount string, srcCurrency string, dstCurrency string, mode string) (proxyApi.ImplResponse, error) {
+	var price float64
+	if mode == "main" {
+		conversion, err := getPriceConversion(amount, srcCurrency, dstCurrency)
+		if err != nil {
+			return proxyApi.Response(http.StatusInternalServerError, nil), err
+		}
+		parsedPrice := conversion.Data[0].Quote[strings.ToUpper(dstCurrency)]["price"]
+		price, err = getFloat(parsedPrice)
+		if err != nil {
+			return proxyApi.Response(http.StatusInternalServerError, nil), err
+		}
 	}
 
-	price, err := getFloat(conversion.Data[0].Quote[strings.ToUpper(dstCurrency)]["price"])
-	if err != nil {
-		return proxyApi.Response(http.StatusInternalServerError, nil), err
+	if mode == "test" {
+		conversion, err := getPriceConversionFromSandbox(amount, srcCurrency, dstCurrency)
+		if err != nil {
+			return proxyApi.Response(http.StatusInternalServerError, nil), err
+		}
+		parsedPrice := conversion.Data[strings.ToLower(srcCurrency)].Quote[strings.ToLower(dstCurrency)]["price"]
+		price, err = getFloat(parsedPrice)
+		if err != nil {
+			return proxyApi.Response(http.StatusInternalServerError, nil), err
+		}
 	}
 
 	priceConversionResponseDto := proxyApi.PriceConversionResponseDto{
@@ -82,12 +118,45 @@ func getFloat(unknown interface{}) (float64, error) {
 }
 
 func getPriceConversion(amount string, srcCurrency string, dstCurrency string) (*CoinMarketCapConversion, error) {
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", utils.Opts.CoinMarketCapBaseUrl+"v2/tools/price-conversion", nil)
+	callUrl := utils.Opts.CoinMarketCapBaseUrl + "v2/tools/price-conversion"
+	resp, err := createRequest(callUrl, amount, srcCurrency, dstCurrency)
 	if err != nil {
 		return nil, err
 	}
 
+	var target CoinMarketCapConversion
+
+	err = json.NewDecoder(resp.Body).Decode(&target)
+	if err != nil {
+		return nil, err
+	}
+
+	return &target, nil
+}
+
+func getPriceConversionFromSandbox(amount string, srcCurrency string, dstCurrency string) (*CoinMarketCapConversionSandbox, error) {
+	callUrl := utils.Opts.CoinMarketCapBaseUrlSandbox + "v2/tools/price-conversion"
+	resp, err := createRequest(callUrl, amount, srcCurrency, dstCurrency)
+	if err != nil {
+		return nil, err
+	}
+
+	var target CoinMarketCapConversionSandbox
+
+	err = json.NewDecoder(resp.Body).Decode(&target)
+	if err != nil {
+		return nil, err
+	}
+
+	return &target, nil
+}
+
+func createRequest(callUrl string, amount string, srcCurrency string, dstCurrency string) (*http.Response, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", callUrl, nil)
+	if err != nil {
+		return nil, err
+	}
 	q := url.Values{}
 	q.Add("amount", amount)
 	q.Add("symbol", srcCurrency)
@@ -102,12 +171,5 @@ func getPriceConversion(amount string, srcCurrency string, dstCurrency string) (
 		return nil, err
 	}
 
-	var target CoinMarketCapConversion
-
-	err = json.NewDecoder(resp.Body).Decode(&target)
-	if err != nil {
-		return nil, err
-	}
-
-	return &target, nil
+	return resp, nil
 }

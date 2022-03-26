@@ -47,6 +47,13 @@ paths:
           schema:
             type: string
           required: true
+        - in: query
+          name: mode
+          schema:
+            type: string
+            enum:
+              - main
+              - test
       responses:
         '200':
           description: successful operation

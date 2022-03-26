@@ -14,11 +14,12 @@ var (
 )
 
 type OptsType struct {
-	ServerPort           int
-	SendGridApiKey       string
-	EmailFrom            string
-	CoinMarketCapBaseUrl string
-	CoinMarketCapApiKey  string
+	ServerPort                  int
+	SendGridApiKey              string
+	EmailFrom                   string
+	CoinMarketCapBaseUrl        string
+	CoinMarketCapBaseUrlSandbox string
+	CoinMarketCapApiKey         string
 }
 
 func NewOpts() {
@@ -32,6 +33,7 @@ func NewOpts() {
 	flag.StringVar(&o.SendGridApiKey, "SENDGRID_API_KEY", lookupEnv("SENDGRID_API_KEY"), "SendGrid API Key")
 	flag.StringVar(&o.EmailFrom, "EMAIL_FROM", lookupEnv("EMAIL_FROM"), "Email From")
 	flag.StringVar(&o.CoinMarketCapBaseUrl, "COIN_MARKET_CAP_BASE_URL", lookupEnv("COIN_MARKET_CAP_BASE_URL"), "COIN MARKET CAP BASE URL")
+	flag.StringVar(&o.CoinMarketCapBaseUrlSandbox, "COIN_MARKET_CAP_BASE_URL_SANDBOX", lookupEnv("COIN_MARKET_CAP_BASE_URL_SANDBOX"), "COIN MARKET CAP BASE URL SANDBOX")
 	flag.StringVar(&o.CoinMarketCapApiKey, "COIN_MARKET_CAP_API_KEY", lookupEnv("COIN_MARKET_CAP_API_KEY"), "COIN MARKET CAP Api Key")
 
 	Opts = o
