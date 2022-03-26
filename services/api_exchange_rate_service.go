@@ -45,7 +45,7 @@ type CoinMarketCapConversion struct {
 		Id          int                               `json:"id"`
 		Symbol      string                            `json:"symbol"`
 		Name        string                            `json:"name"`
-		Amount      int                               `json:"amount"`
+		Amount      float64                           `json:"amount"`
 		LastUpdated time.Time                         `json:"last_updated"`
 		Quote       map[string]map[string]interface{} `json:"quote"`
 	} `json:"data"`
@@ -67,7 +67,7 @@ type DataSandbox struct {
 	Symbol      string                            `json:"symbol"`
 	Id          string                            `json:"id"`
 	Name        string                            `json:"name"`
-	Amount      int                               `json:"amount"`
+	Amount      float64                           `json:"amount"`
 	LastUpdated time.Time                         `json:"last_updated"`
 	Quote       map[string]map[string]interface{} `json:"quote"`
 }
@@ -92,7 +92,7 @@ func (s *ConversionApiService) GetPriceConversion(_ context.Context, amount stri
 		if err != nil {
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
 		}
-		parsedPrice := conversion.Data[strings.ToLower(srcCurrency)].Quote[strings.ToLower(dstCurrency)]["price"]
+		parsedPrice := conversion.Data[strings.ToUpper(srcCurrency)].Quote[strings.ToUpper(dstCurrency)]["price"]
 		price, err = getFloat(parsedPrice)
 		if err != nil {
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
@@ -159,8 +159,8 @@ func createRequest(callUrl string, amount string, srcCurrency string, dstCurrenc
 	}
 	q := url.Values{}
 	q.Add("amount", amount)
-	q.Add("symbol", srcCurrency)
-	q.Add("convert", dstCurrency)
+	q.Add("symbol", strings.ToUpper(srcCurrency))
+	q.Add("convert", strings.ToUpper(dstCurrency))
 
 	req.Header.Set("Accepts", "application/json")
 	req.Header.Add("X-CMC_PRO_API_KEY", utils.Opts.CoinMarketCapApiKey)
