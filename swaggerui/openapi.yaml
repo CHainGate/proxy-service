@@ -117,8 +117,7 @@ components:
         dst_currency:
           type: string
         price:
-          type: number
-          format: double
+          type: string
     WebHookRequestDto:
       title: WebHook Request Dto
       type: object
@@ -170,17 +169,14 @@ components:
             - usd
             - chf
         pay_amount:
-          type: number
-          format: double
+          type: string
         pay_currency:
           type: string
           enum:
             - eth
             - btc
         actually_paid:
-          type: number
-          format: double
-          nullable: true
+          type: string
         payment_status:
           type: string
           enum:

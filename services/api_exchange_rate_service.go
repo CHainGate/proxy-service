@@ -74,14 +74,14 @@ type DataSandbox struct {
 
 // GetPriceConversion - get price conversion
 func (s *ConversionApiService) GetPriceConversion(_ context.Context, amount string, srcCurrency string, dstCurrency string, mode string) (proxyApi.ImplResponse, error) {
-	var price float64
+	var price string
 	if mode == "main" {
 		conversion, err := getPriceConversion(amount, srcCurrency, dstCurrency)
 		if err != nil {
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
 		}
 		parsedPrice := conversion.Data[0].Quote[strings.ToUpper(dstCurrency)]["price"]
-		price, err = getFloat(parsedPrice)
+		price, err = getString(parsedPrice)
 		if err != nil {
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
 		}
@@ -93,7 +93,7 @@ func (s *ConversionApiService) GetPriceConversion(_ context.Context, amount stri
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
 		}
 		parsedPrice := conversion.Data[strings.ToUpper(srcCurrency)].Quote[strings.ToUpper(dstCurrency)]["price"]
-		price, err = getFloat(parsedPrice)
+		price, err = getString(parsedPrice)
 		if err != nil {
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
 		}
@@ -108,12 +108,12 @@ func (s *ConversionApiService) GetPriceConversion(_ context.Context, amount stri
 	return proxyApi.Response(http.StatusOK, priceConversionResponseDto), nil
 }
 
-func getFloat(unknown interface{}) (float64, error) {
+func getString(unknown interface{}) (string, error) {
 	switch t := unknown.(type) {
-	case float64:
+	case string:
 		return t, nil
 	default:
-		return 0, errors.New("Could not parse to float ")
+		return "0", errors.New("Could not parse to float ")
 	}
 }
 
