@@ -117,7 +117,8 @@ components:
         dst_currency:
           type: string
         price:
-          type: string
+          type: number
+          format: double
     WebHookRequestDto:
       title: WebHook Request Dto
       type: object
