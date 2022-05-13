@@ -152,7 +152,7 @@ components:
         - pay_amount
         - pay_currency
         - actually_paid
-        - payment_status
+        - payment_state
         - created_at
         - updated_at
       properties:
@@ -178,7 +178,7 @@ components:
             - btc
         actually_paid:
           type: string
-        payment_status:
+        payment_state:
           type: string
           enum:
             - waiting
