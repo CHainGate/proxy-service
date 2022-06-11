@@ -15,6 +15,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 )
 
@@ -33,11 +34,13 @@ func NewWebhookApiService() proxyApi.WebhookApiServicer {
 func (s *WebhookApiService) SendWebhook(_ context.Context, webHook proxyApi.WebHookRequestDto) (proxyApi.ImplResponse, error) {
 	jsonData, err := json.Marshal(webHook.Body)
 	if err != nil {
+		log.Printf("SendWebhook error: %s", err.Error())
 		return proxyApi.Response(http.StatusInternalServerError, nil), errors.New("Cannot convert body to json ")
 	}
 
 	resp, err := http.Post(webHook.Url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
+		log.Printf("SendWebhook error: %s", err.Error())
 		return proxyApi.Response(http.StatusInternalServerError, nil), err
 	}
 
