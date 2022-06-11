@@ -15,6 +15,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -78,11 +79,13 @@ func (s *ConversionApiService) GetPriceConversion(_ context.Context, amount stri
 	if mode == "main" {
 		conversion, err := getPriceConversion(amount, srcCurrency, dstCurrency)
 		if err != nil {
+			log.Printf("getPriceConversion error: %s", err.Error())
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
 		}
 		parsedPrice := conversion.Data[0].Quote[strings.ToUpper(dstCurrency)]["price"]
 		price, err = getFloat(parsedPrice)
 		if err != nil {
+			log.Printf("getFloat error: %s", err.Error())
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
 		}
 	}
@@ -90,11 +93,13 @@ func (s *ConversionApiService) GetPriceConversion(_ context.Context, amount stri
 	if mode == "test" {
 		conversion, err := getPriceConversionFromSandbox(amount, srcCurrency, dstCurrency)
 		if err != nil {
+			log.Printf("getPriceConversionFromSandbox error: %s", err.Error())
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
 		}
 		parsedPrice := conversion.Data[strings.ToUpper(srcCurrency)].Quote[strings.ToUpper(dstCurrency)]["price"]
 		price, err = getFloat(parsedPrice)
 		if err != nil {
+			log.Printf("getFloat error: %s", err.Error())
 			return proxyApi.Response(http.StatusInternalServerError, nil), err
 		}
 	}

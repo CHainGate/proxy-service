@@ -14,6 +14,7 @@ import (
 	"chaingate/proxy-service/utils"
 	"context"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/sendgrid/sendgrid-go"
@@ -43,6 +44,7 @@ func (s *EmailApiService) SendEmail(_ context.Context, email proxyApi.EmailReque
 
 	_, err := client.Send(message)
 	if err != nil {
+		log.Printf("Sending email failed: %s", err.Error())
 		return proxyApi.Response(http.StatusInternalServerError, nil), errors.New("E-Mail could not be sent")
 	}
 

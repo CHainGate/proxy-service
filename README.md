@@ -1,7 +1,6 @@
 # proxy-service
 
-swagger urls: \
-http://localhost:8001/api/swaggerui/ \
+Swagger UI: http://localhost:8001/api/swaggerui/
 
 openapi gen:
  ```
